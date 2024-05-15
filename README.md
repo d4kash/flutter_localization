@@ -1,7 +1,9 @@
 # Flutter-Localization-Sample
+
 This example demonstrates how to use localization in flutter application.
 
 ## Add required library under dependencies section in pubspec file
+
 ```gradle
 flutter_localizations:
     sdk: flutter
@@ -10,6 +12,7 @@ flutter_localizations:
 ## Create Json Files For Supported Languages
 
 en.json For English
+
 ```json
 {
   "player_name": "Player Name",
@@ -19,6 +22,7 @@ en.json For English
 ```
 
 es.json For Spanish
+
 ```json
 {
   "player_name": "Nombre del jugador",
@@ -28,6 +32,7 @@ es.json For Spanish
 ```
 
 fr.json For French
+
 ```json
 {
   "player_name": "Nom de joueur",
@@ -37,6 +42,7 @@ fr.json For French
 ```
 
 ## Set Json Files Paths in pubspec file
+
 ```yaml
 assets:
   - language/en.json
@@ -45,41 +51,69 @@ assets:
 ```
 
 ## Create Classes For Localization
+
 ```dart
-import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutterlocalizationsample/application_localizations_delegate.dart';
+import 'dart:convert';
 
-class ApplicationLocalizations {
-  final Locale appLocale;
+class AppLocalizations {
+  final Locale locale;
 
-  ApplicationLocalizations(this.appLocale);
+  AppLocalizations(this.locale);
 
-  static ApplicationLocalizations of(BuildContext context) {
-    return Localizations.of<ApplicationLocalizations>(context, ApplicationLocalizations);
+  static AppLocalizations? of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<ApplicationLocalizations> delegate =
-  ApplicationLocalizationsDelegate();
+  // This [delegate] will be called from MaterialApp
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
-  Map<String, String> _localizedStrings;
+  Map<String, String>? _localizedString;
 
+  // This method will load the required JSON file according to locale
   Future<bool> load() async {
-    // Load JSON file from the "language" folder
-    String jsonString =
-    await rootBundle.loadString('assets/language/${appLocale.languageCode}.json');
-    Map<String, dynamic> jsonLanguageMap = json.decode(jsonString);
-    _localizedStrings = jsonLanguageMap.map((key, value) {
-      return MapEntry(key, value.toString());
-    });
+    String jsonStr =
+        await rootBundle.loadString("assets/language/${locale.languageCode}.json");
+
+    Map<String, dynamic> jsonMap = jsonDecode(jsonStr);
+
+    _localizedString =
+        jsonMap.map((key, value) => MapEntry(key, value.toString()));
+
     return true;
   }
 
-  // called from every widget which needs a localized text
-  String translate(String jsonkey) {
-    return _localizedStrings[jsonkey];
+  // This method will return the localized string for given key
+  String? translate(String key) {
+    print("localised: ${_localizedString?[key]}");
+    return _localizedString?[key] ?? "";
+  }
+}
+
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
+  const _AppLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) {
+    // All supported languages
+    return ['en', 'es', 'fr'].contains(locale.languageCode);
+  }
+
+  @override
+  Future<AppLocalizations> load(Locale locale) async {
+    AppLocalizations appLocalizations = AppLocalizations(locale);
+
+    // The [load] method from AppLocalizations class runs here
+    await appLocalizations.load();
+    return appLocalizations;
+  }
+
+  @override
+  bool shouldReload(covariant LocalizationsDelegate<AppLocalizations> old) {
+    return false;
   }
 }
 ```
@@ -88,7 +122,7 @@ class ApplicationLocalizations {
 import 'package:flutter/material.dart';
 import 'package:flutterlocalizationsample/application_localizations.dart';
 
-class ApplicationLocalizationsDelegate extends LocalizationsDelegate<ApplicationLocalizations> {
+class ApplicationLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   // This delegate instance will never change (it doesn't even have fields!)
   // It can provide a constant constructor.
   const ApplicationLocalizationsDelegate();
@@ -100,9 +134,9 @@ class ApplicationLocalizationsDelegate extends LocalizationsDelegate<Application
   }
 
   @override
-  Future<ApplicationLocalizations> load(Locale locale) async {
+  Future<AppLocalizations> load(Locale locale) async {
     // AppLocalizations class is where the JSON loading actually runs
-    ApplicationLocalizations localizations = new ApplicationLocalizations(locale);
+    AppLocalizations localizations = new AppLocalizations(locale);
     await localizations.load();
     return localizations;
   }
@@ -113,6 +147,7 @@ class ApplicationLocalizationsDelegate extends LocalizationsDelegate<Application
 ```
 
 ## Integrate Localization in main.dart file
+
 ```dart
       supportedLocales: [
         Locale( 'en' , 'US' ),
@@ -121,11 +156,12 @@ class ApplicationLocalizationsDelegate extends LocalizationsDelegate<Application
       ],
 
       localizationsDelegates: [
-        ApplicationLocalizations.delegate,
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
       ],
-
+      locale: Locale( 'fr' , 'FR' ), // set locale for reflecting changes on app
       localeResolutionCallback: (locale, supportedLocales) {
         for (var supportedLocaleLanguage in supportedLocales) {
           if (supportedLocaleLanguage.languageCode == locale.languageCode &&
@@ -138,6 +174,7 @@ class ApplicationLocalizationsDelegate extends LocalizationsDelegate<Application
 ```
 
 ## Display Localized Text
+
 ```dart
 Text(ApplicationLocalizations.of(context).translate("player_name"));
 ```
