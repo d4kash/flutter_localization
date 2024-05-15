@@ -32,7 +32,6 @@ class AppLocalizations {
 
   // This method will return the localized string for given key
   String? translate(String key) {
-    print("localised: ${_localizedString?[key]}");
     return _localizedString?[key] ?? "";
   }
 }

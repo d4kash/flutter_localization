@@ -15,9 +15,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       supportedLocales: [
-        Locale( 'en' , 'US' ),
-        Locale( 'es' , 'ES' ),
-        Locale( 'fr' , 'FR' ),
+        Locale('en', 'US'),
+        Locale('es', 'ES'),
+        Locale('fr', 'FR'),
       ],
 
       localizationsDelegates: [
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-locale: Locale( 'fr' , 'FR' ), // set locale for reflecting changes on app
+      locale: Locale('fr', 'FR'), // set locale for reflecting changes on app
       localeResolutionCallback: (locale, supportedLocales) {
         for (var supportedLocaleLanguage in supportedLocales) {
           if (supportedLocaleLanguage.languageCode == locale?.languageCode &&
